@@ -1,0 +1,38 @@
+# The pipeline will trigger on all commits to a branches under "topic/*" and to the "master" branch.
+
+trigger:
+- topic/*
+- master
+
+variables:
+
+  # If it IS a pull request build, or we're NOT building a 'topic' or the 'master' branch - we should only build the CI-package(s)
+  ${{ if or(eq(variables['Build.Reason'], 'PullRequest'), and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/topic/')), not(eq(variables['Build.SourceBranch'], 'refs/heads/master')))) }}:
+    buildContinuousIntegrationPackages: true
+    buildReleasePackages: false
+    publishArtifacts: false
+
+  # If it is NOT a pull request build, and we're building a 'topic' branch - we should build the CI-package(s) and publish it, so that it can be deployed to Azure Artifacts if needed
+  ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.SourceBranch'], 'refs/heads/topic/')) }}:
+    buildContinuousIntegrationPackages: true
+    buildReleasePackages: false
+    publishArtifacts: true
+
+  # If it is NOT a pull request build, and we're building the 'master' branch - we should build the release-package(s) and publish it, so that it can be deployed to Azure Artifacts
+  ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
+    buildContinuousIntegrationPackages: false
+    buildReleasePackages: true
+    publishArtifacts: true
+
+resources:
+  repositories:
+    - repository: Infrastructure.Pipelines
+      type: git
+      name: Infrastructure.Pipelines
+
+stages:
+- template: 'netcore/default-nuget-pipeline.yml@Infrastructure.Pipelines'
+  parameters:
+    buildContinuousIntegrationPackages: ${{ variables.buildContinuousIntegrationPackages }}
+    buildReleasePackages: ${{ variables.buildReleasePackages }}
+    publishArtifacts: ${{ variables.publishArtifacts }}

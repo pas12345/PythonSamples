@@ -1,0 +1,1258 @@
+global:
+  environment: prod
+
+utilityWorkflows:
+  enabled: true
+
+azureMetricsExporter:
+  enabled: true
+
+  helm:
+    values:
+      config:
+        subscriptionId: aade9208-6b2c-447d-8021-5220caddeb38 #prod sub
+        tenantId: f7619355-6c67-4100-9a78-1847f30742e2
+        clientId: 053c43c8-8309-474b-8762-e1b0d6da1c64
+        clientSecret: wYi3ull9j0FDdACPwAg_KZtm.4CxB2HxaZ
+
+        # to help finding metrics names https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported#microsoftclassicstoragestorageaccounts
+        targets:
+          # - resource: /resourceGroups/core-prod/providers/Microsoft.Storage/storageAccounts/dpcontentstorageprod
+          - resource: /resourceGroups/core-prod/providers/Microsoft.Storage/storageAccounts/dpcontentstorageprod/blobServices/default
+            metrics:
+             - Availability
+             - BlobCapacity
+             - BlobCount
+             - ContainerCount
+             - Egress
+             - Ingress
+             - SuccessE2ELatency
+             - SuccessServerLatency
+             - Transactions
+
+flink:
+  enabled: true
+  namespace: flink
+  repoURL: https://github.com/Open-Dataplatform/infra-flink.git
+  path: flink
+  # targetRevision:
+  image:
+    repo: apache/flink
+    tag: 1.12.0-scala_2.11
+
+  ingress:
+    enabled: false
+
+osirisingress:
+  appName: osiris-ingress
+  helm:
+    values:
+      image:
+        tag: 'b1b1573'
+
+osirisegress:
+  appName: osiris-egress
+  helm:
+    values:
+      cors:
+        origins: https://dataplatform.energinet.dk
+      endpoints: |
+        [JAO]
+        yearly_guid = 2d20ccdc-d9f3-4a99-a7a9-08d91a00b8e7
+        monthly_guid = 48c22d75-940a-41e9-adff-08d8fda4ba53
+
+        [JAO EDS]
+        guid = 213defb0-ced9-40f3-dc2a-08d945e7e910
+
+        [iKontrol]
+        guid = 31035e7e-7240-4e5d-9bea-08d90a4e650d
+
+        [Neptun]
+        daily_guid = 5466d7cc-77cb-4cd1-1155-08d925bcbaf2
+        hourly_guid = 0d80b6fc-fcfb-4848-1153-08d925bcbaf2
+        minutely_guid = 49408b8e-54fd-4d78-115d-08d925bcbaf2
+        masterdata_guid = 097d3c7c-4fcd-4b74-7084-08d98fa72496
+
+        [Delfin]
+        daily_guid = bc870e52-f1fe-4df8-1156-08d925bcbaf2
+        hourly_guid = cb2c7313-58be-460f-9be8-08d90a4e650d
+        minutely_guid = 55b1a30b-06e6-45d1-9be9-08d90a4e650d
+
+        [DMI]
+        guid = 2c844464-5872-4d60-dc2c-08d945e7e910
+
+        [Oilcable]
+        pt1m_guid = 025a6b59-5369-40ad-a87b-08d8de4f4dcb
+        pt24h_guid = b9cc5c13-d1a8-4add-a87c-08d8de4f4dcb
+        leakprop_guid = 3a882bda-04a1-4421-a880-08d8de4f4dcb
+
+        [Dataset Config]
+        # GTMS
+        2cb9c571-3a5a-4d5c-eed1-08d9628f61e5 = {"index": "GASMONTH", "horizon": "MONTH"}
+        ec135591-bbf6-4e69-eecd-08d9628f61e5 = {"index": "GASDAY", "horizon": "DAY"}
+        726dd6be-c485-4cf9-eecf-08d9628f61e5 = {"index": "GASDAY", "horizon": "DAY"}
+        50a24e8a-1d6e-4de5-13c3-08d966dc19d5 = {"index": "GASDAY", "horizon": "DAY"}
+        adc8d96f-8e3d-4e3d-af48-08d86c4300e8 = {"index": "REV_DATE", "horizon": "NONE"}
+        b1c9449c-a452-4308-af47-08d86c4300e8 = {"index": "REV_DATE", "horizon": "NONE"}
+        acfee9a5-fc82-4e4d-af46-08d86c4300e8 = {"index": "CREATED_DATE", "horizon": "MONTH"}
+        14e4bf94-afab-44b3-af45-08d86c4300e8 = {"index": "ACTUAL_TIME", "horizon": "MONTH"}
+        3ab1b6f7-d0ec-4c16-7de5-08d86b849d90 = {"index": "GASDAY", "horizon": "MONTH"}
+        55b1015a-e04e-442c-eed4-08d9628f61e5 = {"index": "GASDAY", "horizon": "DAY"}
+        6c460d49-a450-48c2-82ff-08d9661b40e3 = {"index": "GASDAY", "horizon": "DAY"}
+        # DMI
+        2c844464-5872-4d60-dc2c-08d945e7e910 = {"index": "Date", "horizon": "MONTH"}
+        # JAO
+        48c22d75-940a-41e9-adff-08d8fda4ba53 = {"index": "from_date", "horizon": "MONTH"}
+        2d20ccdc-d9f3-4a99-a7a9-08d91a00b8e7 = {"index": "from_date", "horizon": "YEAR"}
+        # Neptun
+        5466d7cc-77cb-4cd1-1155-08d925bcbaf2 = {"index": "Timestamp", "horizon": "MONTH"}
+        0d80b6fc-fcfb-4848-1153-08d925bcbaf2 = {"index": "Timestamp", "horizon": "DAY"}
+        49408b8e-54fd-4d78-115d-08d925bcbaf2 = {"index": "Timestamp", "horizon": "DAY"}
+        097d3c7c-4fcd-4b74-7084-08d98fa72496 = {"index": "", "horizon": "NONE"}
+        # Delfin
+        bc870e52-f1fe-4df8-1156-08d925bcbaf2 = {"index": "HIST_TIMESTAMP", "horizon": "DAY"}
+        cb2c7313-58be-460f-9be8-08d90a4e650d = {"index": "HIST_TIMESTAMP", "horizon": "HOUR"}
+        55b1a30b-06e6-45d1-9be9-08d90a4e650d = {"index": "HIST_TIMESTAMP", "horizon": "MINUTE"}
+        # Nationalbanken
+        ed9700b3-59a1-47fd-dc29-08d945e7e910 = {"index": "Date", "horizon": "YEAR"}
+        # GAS
+        d1821849-f127-4dc8-a883-08d8de4f4dcb = {"index": "datetime", "horizon": "YEAR"}
+        # Oil analysis
+        aa75bfad-276f-49f5-9be0-08d90a4e650d = {"index": "Udtagsdato", "horizon": "NONE"}
+        # Nordpool
+        531fa345-81f7-4878-eed7-08d9628f61e5 = {"index": "_dp_datetime_utc", "horizon": "MONTH"}
+        # SAP
+        c243e352-af2d-4836-dc2e-08d945e7e910 = {"index": "TimestampUTC", "horizon": "DAY"}
+        8d75721d-3dfb-4bf2-0f35-08d9768c2065 = {"index": "TimestampUTC", "horizon": "HOUR"}
+        eb5ff8dc-9af4-4530-c2f3-08d97f26947a = {"index": "TimestampUTC", "horizon": "HOUR"}
+        aa51fe66-e24a-4fde-c2f6-08d97f26947a = {"index": "TimestampUTC", "horizon": "DAY"}
+        74aba512-fed2-4453-c2f5-08d97f26947a = {"index": "TimestampUTC", "horizon": "DAY"}
+        5dc9092e-2f71-4561-c2f4-08d97f26947a = {"index": "TimestampUTC", "horizon": "DAY"}
+        743e143c-20da-4b3d-c2f7-08d97f26947a = {"index": "TimestampUTC", "horizon": "DAY"}
+
+      image:
+        tag: 'db36217'
+
+datacatalogbackend:
+  enabled: true
+
+  helm:
+    values:
+      image:
+        tag: 'eb0899c'
+
+      env:
+        contactInfoName: 'Data Stewards'
+        contactInfoLink: 'https://energinet.service-now.com/sp?id=sc_cat_item&sys_id=99b1b49287a6f450b11964e80cbb35a5&sysparm_category=4e327cd287a6f450b11964e80cbb3599'
+        contactInfoEmail: 'datahelp@energinet.dk'
+
+
+datacatalogfrontend:
+  enabled: true
+
+  helm:
+    values:
+      image:
+        tag: '661c1ad'
+      dynamicEnvironment:
+        base: https://dp-prod.westeurope.cloudapp.azure.com/datacatalog-backend
+        production: true
+        oidcSettings:
+          client_id: e65fb960-d455-4c4b-a8ec-9cc00e53c9b8
+          authority: https://login.microsoftonline.com/f7619355-6c67-4100-9a78-1847f30742e2/v2.0/
+          response_type: code
+          post_logout_redirect_uri: https://dataplatform.energinet.dk
+          loadUserInfo: false
+          redirect_uri: https://dataplatform.energinet.dk/login
+          silent_redirect_uri: https://dataplatform.energinet.dk/login
+          automaticSilentRenew: true
+          scope: api://e65fb960-d455-4c4b-a8ec-9cc00e53c9b8/user_impersonation openid profile offline_access
+        oboOidcSettings:
+          client_id: d9cd520e-2317-4db6-a5ae-77f0949085af
+          authority: https://login.microsoftonline.com/f7619355-6c67-4100-9a78-1847f30742e2/v2.0/
+          response_type: code
+          popup_redirect_uri: https://dataplatform.energinet.dk/obo-login
+          scope: https://storage.azure.com/user_impersonation
+
+      ingress:
+        host: dataplatform.energinet.dk
+        path: "/"
+
+        tls:
+          hosts:
+            - secretName: datacatalog-energinet-crt
+              hosts:
+                - dataplatform.energinet.dk
+
+      externalSecret:
+        enabled: true
+
+        role: dataplatform
+
+        secrets:
+        - name: tls.crt
+          # The full path of the secret to read, as in `vault read secret/data/hello-service/credentials`
+          key: dataplatform/data/certificates
+          property: tls.crt
+
+        # Vault values are matched individually. If you have several keys in your Vault secret, you will need to add them all separately
+        - name: tls.key
+          key: dataplatform/data/certificates
+          property: tls.key
+
+adapters:
+  default:
+    image:
+      # The root url for the image repository
+      rootRepoUrl: service-dp.westeurope.cloudapp.azure.com
+
+    # The location of the helm chart
+    repoURL: https://github.com/Open-Dataplatform/osiris-helm.git
+    path: osiris-transformations
+    targetRevision: HEAD
+
+  # The list of transformations to build
+  list:
+  - adapter: jao-monthly
+    enabled: true
+    appName: i-jao-monthly
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-ingress-adapter-jao
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: ingress-adapter-jao
+
+    # The command to start your code
+    command: python -m ingress_adapter_jao.adapter
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 1 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    #The template for the secret file
+    secretTemplate: |
+      [Authorization]
+      tenant_id = {{ .Data.data.tenant_id }}
+      client_id = {{ .Data.data.client_id }}
+      client_secret = {{ .Data.data.secret }}
+
+      [JAO Server]
+      auth_api_key = {{ .Data.data.jao_api_key}}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 4fe6499b-23f9-4013-adfd-08d8fda4ba53
+      [JAO Server]
+      server_url = https://api.jao.eu/OWSMP
+      [JAO Values]
+      default_date = 2016-01-01
+      horizon = Monthly
+
+  - adapter: jao-yearly
+    enabled: true
+    appName: i-jao-yearly
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-ingress-adapter-jao
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: ingress-adapter-jao
+
+    # The command to start your code
+    command: python -m ingress_adapter_jao.adapter
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 1 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    #The template for the secret file
+    secretTemplate: |
+      [Authorization]
+      tenant_id = {{ .Data.data.tenant_id }}
+      client_id = {{ .Data.data.client_id }}
+      client_secret = {{ .Data.data.secret }}
+
+      [JAO Server]
+      auth_api_key = {{ .Data.data.jao_api_key}}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = ff29b8b4-cd84-4253-a7aa-08d91a00b8e7
+      [JAO Server]
+      server_url = https://api.jao.eu/OWSMP
+      [JAO Values]
+      default_date = 2016-01-01
+      horizon = Yearly
+
+  - adapter: nationalbanken
+    enabled: true
+    appName: i-nationalbanken
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-ingress-adapter-nationalbanken
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: ingress-adapter-nationalbanken
+
+    # The command to start your code
+    command: python -m ingress_adapter_nationalbanken
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 1 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      guid = ed9700b3-59a1-47fd-dc29-08d945e7e910
+
+      [NB Server]
+      five_days_url = https://www.nationalbanken.dk/_vti_bin/DN/DataService.svc/CurrencyRatesHistoryXML?lang=da
+      backfill_url = https://www.nationalbanken.dk/_vti_bin/DN/DataService.svc/CurrencyRateCSV?lang=da
+
+  - adapter: ikontrol
+    enabled: true
+    appName: i-ikontrol
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-ingress-adapter-ikontrol
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: ingress-adapter-ikontrol
+
+    # The command to start your code
+    command: python -m ingress_adapter_ikontrol.adapter
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 1 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    secretTemplate: |
+      [Authorization]
+      tenant_id = {{ .Data.data.tenant_id }}
+      client_id = {{ .Data.data.client_id }}
+      client_secret = {{ .Data.data.secret }}
+
+      [iKontrol Authorization]
+      api_key = {{ .Data.data.api_key }}
+      username = {{ .Data.data.username }}
+      password = {{ .Data.data.password }}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 99c6b076-b6d2-475c-9be2-08d90a4e650d
+      [iKontrol API]
+      api_url = https://publicapi.ikontrol.dk
+      api_version = v3
+
+transformations:
+  default:
+    image:
+      # The root url for the image repository
+      rootRepoUrl: service-dp.westeurope.cloudapp.azure.com
+
+    # The location of the helm chart
+    repoURL: https://github.com/Open-Dataplatform/osiris-helm.git
+    path: osiris-transformations
+    targetRevision: HEAD
+
+  # The list of transformations to build
+  list:
+  - transformation: i2et-sf6
+    enabled: true
+    appName: t-i2et-sf6
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ingress2event-time-sf6
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "0/15 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = ebc4f329-b59e-40a5-a882-08d8de4f4dcb
+      destination = d1821849-f127-4dc8-a883-08d8de4f4dcb
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S.%%f
+      date_key_name = datetime
+      # Types: NONE, YEAR, MONTH, DAY, HOUR, MINUTE
+      time_resolution = YEAR
+      [Pipeline]
+      max_files = 20
+
+  - transformation: t-Jao-monthly
+    enabled: true
+    appName: t-jao-monthly
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ingress2event-time-jao
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-jao
+
+    # The command to start your code
+    command: python -m transform_jao
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "0/15 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 4fe6499b-23f9-4013-adfd-08d8fda4ba53
+      destination = 48c22d75-940a-41e9-adff-08d8fda4ba53
+      # Types: NONE, YEAR, MONTH, DAY, HOUR, MINUTE
+      time_resolution = MONTH
+      [Pipeline]
+      max_files = 3
+
+  - transformation: t-Jao-yearly
+    enabled: true
+    appName: t-jao-yearly
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ingress2event-time-jao
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-jao
+
+    # The command to start your code
+    command: python -m transform_jao
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "0 2 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = ff29b8b4-cd84-4253-a7aa-08d91a00b8e7
+      destination = 2d20ccdc-d9f3-4a99-a7a9-08d91a00b8e7
+      # Types: NONE, YEAR, MONTH, DAY, HOUR, MINUTE
+      time_resolution = YEAR
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-biocertificate-bi
+    enabled: true
+    appName: t-i2et-gtms-biocertificate-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtmsbiocertbi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "40 10 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = b133dd7a-f1e8-48db-fc33-08d8b6fedea4
+      destination = ec135591-bbf6-4e69-eecd-08d9628f61e5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASDAY
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-data-h-bi
+    enabled: true
+    appName: t-i2et-gtms-data-h-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtmsdatahbi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "45 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = da650d2c-2780-44dc-6b3c-08d876589e90
+      destination = 726dd6be-c485-4cf9-eecf-08d9628f61e5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASDAY
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-invoice-lines-bi
+    enabled: true
+    appName: t-i2et-gtms-invoice-lines-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtms-invoice-lines-bi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "33 18 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 471d3e34-b843-4298-fc34-08d8b6fedea4
+      destination = 2cb9c571-3a5a-4d5c-eed1-08d9628f61e5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASMONTH
+      time_resolution = MONTH
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-balance-system-bi
+    enabled: true
+    appName: t-i2et-gtms-balance-system-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtms-balance-system-bi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "7 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 0f3897d5-0c57-4967-7de4-08d86b849d90
+      destination = 55b1015a-e04e-442c-eed4-08d9628f61e5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASDAY
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-alloc-bi
+    enabled: true
+    appName: t-i2et-gtms-alloc-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtms-alloc-bi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "7 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: true
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    logLevel: "INFO"
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 02480cbc-5361-43ab-e1d8-08d86464f17e
+      destination = 6c460d49-a450-48c2-82ff-08d9661b40e3
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASDAY
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-gtms-nom-bi
+    enabled: true
+    appName: t-i2et-gtms-nom-bi
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-gtms-nom-bi-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "7 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = fecfb55e-4637-4ff6-af49-08d86c4300e8
+      destination = 50a24e8a-1d6e-4de5-13c3-08d966dc19d5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%S
+      date_key_name = GASDAY
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3
+
+  - transformation: i2et-nordpool
+    enabled: true
+    appName: t-i2et-nordpool
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ingress2event-time-nordpool-prod
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    # Defaults to "0/15 * * * *"
+    schedule: "7 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = be8e3fd7-e0ce-43d4-eed5-08d9628f61e5
+      destination = 531fa345-81f7-4878-eed7-08d9628f61e5
+      date_format = %%Y-%%m-%%dT%%H:%%M:%%SZ
+      date_key_name = _dp_datetime_utc
+      time_resolution = MONTH
+      [Pipeline]
+      max_files = 10
+
+  - transformation: neptun-3m
+    enabled: true
+    appName: t-neptun-3m
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-neptun
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-neptun
+
+    # The command to start your code
+    command: python -m transform_neptun
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "*/3 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: true
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    logLevel: "INFO"
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 3f0d123a-377f-49c7-115b-08d925bcbaf2
+      destination = 49408b8e-54fd-4d78-115d-08d925bcbaf2
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 6
+
+  - transformation: neptun-1h
+    enabled: true
+    appName: t-neptun-1h
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-neptun
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-neptun
+
+    # The command to start your code
+    command: python -m transform_neptun
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "0 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: true
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    logLevel: "INFO"
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 5bcbaade-8c9f-41fe-115a-08d925bcbaf2
+      destination = 0d80b6fc-fcfb-4848-1153-08d925bcbaf2
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 6
+
+  - transformation: neptun-1d
+    enabled: true
+    appName: t-neptun-1d
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-neptun
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-neptun
+
+    # The command to start your code
+    command: python -m transform_neptun
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "0 0 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: true
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    logLevel: "INFO"
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 939ac086-65c1-492b-9be1-08d90a4e650d
+      destination = 5466d7cc-77cb-4cd1-1155-08d925bcbaf2
+      time_resolution = MONTH
+      [Pipeline]
+      max_files = 6
+
+ - transformation: neptun-masterdata
+    enabled: true
+    appName: t-neptun-masterdata
+    # The name of the secret that holds the dataset credentials
+    secretName: sp-dp-neptun-masterdata-p
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-neptun-masterdata
+
+    # The command to start your code
+    command: python -m transform_neptun_masterdata
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "10 5 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source: b083b985-9410-409c-8f52-08d9883a8847
+      destination: 097d3c7c-4fcd-4b74-7084-08d98fa72496
+      time_resolution = NONE
+      [Pipeline]
+      max_files = 3
+      
+  - transformation: dmi-weather
+    enabled: true
+    appName: t-dmi-weather
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-dmi-weather
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-dmi-weather
+
+    # The command to start your code
+    command: python -m transform_dmi_weather
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0/15 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: true
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    logLevel: "INFO"
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = f9561592-55dc-4af3-9be7-08d90a4e650d
+      destination = 2c844464-5872-4d60-dc2c-08d945e7e910
+      model = harmonie
+      batch_size = 5
+
+  - transformation: ikontrol
+    enabled: true
+    appName: t-ikontrol
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ikontrol
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ikontrol
+
+    # The command to start your code
+    command: python -m transform_ikontrol
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = 99c6b076-b6d2-475c-9be2-08d90a4e650d
+      destination = 31035e7e-7240-4e5d-9bea-08d90a4e650d
+      [Pipeline]
+      max_files = 100
+
+  - transformation: oilcable-leakdetection
+    enabled: true
+    appName: t-oilcable-leakdetection
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-oilcable-leakdetection-prod
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-oilcable-leakdetection
+
+    # The command to start your code
+    command: python -m transform_oilcable_leakdetection
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "5 3 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    jaeger: false
+
+    # The template for the secret file
+    secretTemplate: |
+      [Authorization]
+      tenant_id = {{ .Data.data.tenant_id }}
+      client_id = {{ .Data.data.client_id }}
+      client_secret = {{ .Data.data.secret }}
+      connection_string = {{ .Data.data.connection_string }}
+
+    # Values for the transformation config
+    config: |
+
+      [Model]
+      endpoint = https://app-oilcable-prod-001.azurewebsites.net/predict
+      state_table = oilcablestate
+
+      [Datasets]
+      scada = 55b1a30b-06e6-45d1-9be9-08d90a4e650d
+      pt1m = 025a6b59-5369-40ad-a87b-08d8de4f4dcb
+      pt24h = b9cc5c13-d1a8-4add-a87c-08d8de4f4dcb
+      model = bf97aca6-4f6a-44a4-a87e-08d8de4f4dcb
+      leak = 3a882bda-04a1-4421-a880-08d8de4f4dcb
+
+  - transformation: jao2eds
+    enabled: true
+    appName: t-jao2eds
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-jao2eds
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-jao2eds
+
+    # The command to start your code
+    command: python -m transform_jao2eds
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "0 3 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Values for the transformation config
+    config: |
+      [Nationalbanken]
+      guid = ed9700b3-59a1-47fd-dc29-08d945e7e910
+
+      [JAO]
+      monthly_guid = 48c22d75-940a-41e9-adff-08d8fda4ba53
+      yearly_guid = 2d20ccdc-d9f3-4a99-a7a9-08d91a00b8e7
+
+      [JAO EDS]
+      guid = 213defb0-ced9-40f3-dc2a-08d945e7e910
+      start_date = 2020-01-01
+      borders =
+           D1-DE
+           D2-DE

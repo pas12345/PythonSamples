@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{55DC7967-63E4-4979-AA1D-CEF808DC7079}"
+	ProjectSection(SolutionItems) = preProject
+		src\nuget-logo.png = src\nuget-logo.png
+		src\version.props = src\version.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Adapter.Ingress.Common", "src\Shared.Adapter.Ingress.Common\Shared.Adapter.Ingress.Common.csproj", "{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8BEDA564-E883-46E5-B5FD-E714CAA92CDF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "unit", "unit", "{E70E0C4E-D59B-4AE9-837B-947CF9653C60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAdapter", "TestAdapter\TestAdapter.csproj", "{E2B88823-08AF-49B7-8D33-484E0AE34151}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2B88823-08AF-49B7-8D33-484E0AE34151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2B88823-08AF-49B7-8D33-484E0AE34151}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2B88823-08AF-49B7-8D33-484E0AE34151}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2B88823-08AF-49B7-8D33-484E0AE34151}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BBCFC647-4BEE-44E1-8A01-CE1D0F1FA122} = {55DC7967-63E4-4979-AA1D-CEF808DC7079}
+		{E70E0C4E-D59B-4AE9-837B-947CF9653C60} = {8BEDA564-E883-46E5-B5FD-E714CAA92CDF}
+		{E2B88823-08AF-49B7-8D33-484E0AE34151} = {E70E0C4E-D59B-4AE9-837B-947CF9653C60}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C49678C3-D432-4D6C-AF41-B7FB5F134626}
+	EndGlobalSection
+EndGlobal

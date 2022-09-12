@@ -1,0 +1,252 @@
+# The global values that is used by default across multiple apps
+global:
+  environment: test
+  targetRevision: HEAD
+  path: chart
+
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        location ~ "^/.*/metrics(/|$)" {
+            deny all;
+          }
+
+utilityWorkflows:
+  enabled: false
+  path: "./workflows"
+  repoURL: git@github.com:Open-Dataplatform/utility-workflows.git
+  namespace: argo
+
+integrationTestWorkflows:
+  enabled: false
+  path: "./workflows"
+  repoURL: git@github.com:Open-Dataplatform/osiris-integration-test.git
+  namespace: argo
+
+azureMetricsExporter:
+  enabled: false
+  namespace: azure-metrics-monitor
+  repoURL: https://github.com/Open-Dataplatform/tooling-azure-metrics-exporter.git
+  # path: # Overrides the global values.
+  # targetRevision: # Overrides the global values.
+
+  helm:
+    values:
+      image:
+        tag: latest
+
+      config:
+        subscriptionId: <sub_id>
+        tenantId: <tenant_id>
+        clientId: <client_id>
+        clientSecret: <client_secret>
+
+        # to help finding metrics names https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported#microsoftclassicstoragestorageaccounts
+        targets:
+          - resource: <resource_url>
+            metrics:
+             - UsedCapacity
+             - Ingress
+             - Egress
+             - Availability
+
+flink:
+  enabled: false
+  namespace: flink
+  repoURL: https://github.com/Open-Dataplatform/infra-flink.git
+  path: flink
+  # targetRevision:
+  image:
+    repo: apache/flink
+    tag: 1.13.0-scala_2.11
+
+# Osiris ingress specific values
+osirisingress:
+  appName: osiris-ingress-test
+  namespace: osiris
+  repoURL: https://github.com/Open-Dataplatform/osiris-ingress-api.git
+  # path: # Overrides the global values.
+  # targetRevision: # Overrides the global values.
+
+  # Values for the Osiris ingress helm chart
+  helm:
+    values:
+      image:
+        tag: latest
+
+# Osiris ingress specific values
+osirisegress:
+  appName: osiris-egress-test
+  namespace: osiris
+  repoURL: https://github.com/Open-Dataplatform/osiris-egress-api.git
+  # path: # Overrides the global values.
+  # targetRevision: # Overrides the global values.
+
+  # Values for the Osiris egress helm chart
+  helm:
+    values:
+      endpoints: |
+        [JAO]
+        yearly_guid = <yearly_guid>
+        monthly_guid = <monthly_guid>
+
+        [Oilcable]
+        pt1m_guid = <>
+        pt24h_guid = <>
+        leakprop_guid = <>
+      image:
+        tag: latest
+
+datacatalogbackend:
+  namespace: datacatalog
+  enabled: false
+  repoURL: git@github.com:Open-Dataplatform/datacatalog-backend.git
+
+  helm:
+    values:
+      image:
+        tag: latest
+    env:
+      contactInfoName: Data Stewards
+      contactInfoLink: https://energinet.service-now.com/sp?id=sc_cat_item&sys_id=99b1b49287a6f450b11964e80cbb35a5&sysparm_category=4e327cd287a6f450b11964e80cbb3599
+      contactInfoEmail: datahelp@energinet.dk
+
+datacatalogfrontend:
+  namespace: datacatalog
+  enabled: false
+  repoURL: git@github.com:Open-Dataplatform/datacatalog-frontend.git
+
+  helm:
+    values:
+      image:
+        tag: latest
+
+adapters:
+  default:
+    image:
+      # The root url for the image repository
+      rootRepoUrl: service-dp.westeurope.cloudapp.azure.com
+
+    # The location of the helm chart
+    repoURL: https://github.com/Open-Dataplatform/osiris-helm.git
+    path: osiris-transformations
+    targetRevision: HEAD
+
+  # The list of transformations to build
+  list:
+  - adapter: jao
+    enabled: false
+    appName: osiris-ingress-adapter-jao-monthly
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-ingress-adapter-jao
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: ingress-adapter-jao
+
+    # The command to start your code
+    command: python -m ingress_adapter_jao.adapter
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 1
+
+    schedule: "0 1 * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    # jaeger: false
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    # loglevel: ""
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = <source_guid>
+      [JAO Server]
+      server_url = <jao_server_url
+      [JAO Values]
+      default_date = 2016-01-01
+      horizon = <horizon>
+
+transformations:
+  default:
+    image:
+      # The root url for the image repository
+      rootRepoUrl: service-dp.westeurope.cloudapp.azure.com
+
+    # The location of the helm chart
+    repoURL: https://github.com/Open-Dataplatform/osiris-helm.git
+    path: osiris-transformations
+    targetRevision: HEAD
+
+  # The list of transformations to build
+  list:
+  - transformation: sf6
+    enabled: false
+    appName: osiris-transform-i2e-time-sf6
+    # The name of the secret that holds the dataset credentials
+    secretName: osiris-transform-ingress2event-time-sf6
+    image:
+      # If you want to override the global rootRepoUrl
+      rootRepoUrl: {}
+      # The name of the image that you wish to use.
+      name: transform-ingress2event-time
+
+    # The command to start your code
+    command: python -m transform_ingress2event_time
+
+    # Pod GC strategy must be one of the following:
+    # * OnPodCompletion - delete pods immediately when pod is completed (including errors/failures)
+    # * OnPodSuccess - delete pods immediately when pod is successful
+    # * OnWorkflowCompletion - delete pods when workflow is completed
+    # * OnWorkflowSuccess - delete pods when workflow is successful
+    podGC: OnWorkflowSuccess
+    # Parallelism limits the max total parallel pods that can execute at the same time in a workflow
+    parallelism: 2
+
+    schedule: "0/15 * * * *"
+
+    # concurrencyPolicy must be one of the following:
+    # * Allow - allow all workflows even if there is old ones
+    # * Replace - remove all old workflows before scheduling a new
+    # * Forbid - do not allow any new workflow while there are old
+    # Defaults to Forbid
+    concurrencyPolicy: {}
+
+    # Enabled Jaeger
+    # This will add the sidecar to the transformation
+    # This will add the jaeger configuration to the config
+    # jaeger: false
+
+    # Set loglevel
+    # Defaults to "WARNING"
+    # logLevel: ""
+
+    # Values for the transformation config
+    config: |
+      [Datasets]
+      source = <source_guid>
+      destination = <destination_guid>
+      date_format = "%%Y-%%m-%%dT%%H:%%M:%%S.%%f"
+      date_key_name = datetime
+      # Types: NONE, YEAR, MONTH, DAY, HOUR, MINUTE
+      time_resolution = DAY
+      [Pipeline]
+      max_files = 3

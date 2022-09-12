@@ -1,0 +1,101 @@
+{{- range .Values.adapters.list }}
+{{- if .enabled }}
+{{- $images := $.Files.Get "image-version.yaml" | fromYaml}}
+{{- $imageName := index $images .image.name }}
+{{- $imageVersion := index $imageName $.Values.global.environment}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .appName }}-{{ $.Values.global.environment }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    component: adapter
+    adapter: {{ .adapter | quote }}
+    env: {{ $.Values.global.environment | quote }}
+spec:
+  destination:
+    namespace: {{ .namespace | default "argo" | quote }}
+    name: env-aks-dp-{{ $.Values.global.environment }}
+  project: {{ $.Values.global.environment | quote }}
+  source:
+    helm:
+      values: |
+        global:
+          app: "adapter"
+          adapter: {{ .adapter | quote }}
+          appName: {{ .appName | quote }}
+          secretName: {{ .secretName | default .appName | quote }}
+          environment: {{ $.Values.global.environment | quote }}
+
+        workflowTemplate:
+          image:
+            repository: {{ .image.rootRepoUrl | default $.Values.adapters.default.image.rootRepoUrl }}/{{ .image.name }}/{{ .image.name }}
+            tag: {{ $imageVersion | quote }}
+          command: {{ .command | quote }}
+
+          podGC: {{ .podGC | quote }}
+          parallelism: {{ .parallelism }}
+          nodeSelector:
+            agentpool: worker
+
+        cron:
+          schedule: {{ .schedule | quote }}
+          concurrencyPolicy: {{ .concurrencyPolicy | default "Forbid" | quote }}
+
+        jaeger:
+          enabled: {{ default .jaeger true }}
+
+        {{- if .secretTemplate }}
+        secretTemplate: |
+{{ .secretTemplate | indent 10 }}
+        {{- end }}
+
+        config:
+          conf.ini: |
+            [Logging]
+            configuration_file = /etc/osiris/log.conf
+            [Azure Storage]
+            ingress_url = https://dp-{{ $.Values.global.environment }}.westeurope.cloudapp.azure.com/osiris-ingress
+            [Jaeger Agent]
+            reporting_host = localhost
+            reporting_port = localhost
+            name = {{ .appName }}
+
+{{ .config | indent 12 }}
+          log.conf: |
+            [loggers]
+            keys=root
+            [handlers]
+            keys=consoleHandler,fileHandler
+            [formatters]
+            keys=fileFormatter,consoleFormatter
+            [logger_root]
+            level={{ .logLevel | default "WARNING"}}
+            handlers=consoleHandler
+            [handler_consoleHandler]
+            class=StreamHandler
+            formatter=consoleFormatter
+            args=(sys.stdout,)
+            [handler_fileHandler]
+            class=FileHandler
+            formatter=fileFormatter
+            args=('logfile.log',)
+            [formatter_fileFormatter]
+            format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+            [formatter_consoleFormatter]
+            format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+
+    path: {{ $.Values.adapters.default.path | quote }}
+    repoURL: {{ $.Values.adapters.default.repoURL | quote }}
+    targetRevision: {{ $.Values.adapters.default.targetRevision | quote }}
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+    syncOptions:
+    - CreateNamespace=true
+{{- end }}
+{{- end }}

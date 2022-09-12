@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osiris-egress-api-{{ .Values.global.environment }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: osiris
+    component: egress
+    env: {{ .Values.global.environment }}
+spec:
+  destination:
+    namespace: {{ .Values.osirisegress.namespace }}
+    name: env-aks-dp-{{ .Values.global.environment }}
+  project: {{ .Values.global.environment }}
+  source:
+    helm:
+      values: |-
+        appName: {{ .Values.osirisegress.appName }}-{{ .Values.global.environment }}
+        deployment:
+          replicas: 1
+          nodeSelector:
+            agentpool: worker
+          image:
+            repository: service-dp.westeurope.cloudapp.azure.com/osiris-egress-api/osiris-egress-api
+            tag: {{ .Values.osirisegress.helm.values.image.tag | quote }}
+
+        ingress:
+          enabled: true
+          host: dp-{{ .Values.global.environment }}.westeurope.cloudapp.azure.com
+          path: /osiris-egress(/|$)(.*)
+          annotations:
+            nginx.ingress.kubernetes.io/rewrite-target: /$2
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            kubernetes.io/ingress.class: nginx
+            nginx.ingress.kubernetes.io/proxy-buffering: "on"
+            nginx.ingress.kubernetes.io/proxy-buffers-numbers: "4 256k"
+            nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+          {{- range $key, $value := .Values.global.ingress.annotations }}
+            {{ $key }}: {{ $value | quote }}
+          {{- end }}
+
+        config:
+          conf.ini: |
+            [Logging]
+            configuration_file = /etc/osiris/log.conf
+
+            [FastAPI]
+            root_path = /osiris-egress
+
+            [Cors]
+            origins = {{ .Values.osirisegress.helm.values.cors.origins }}
+            methods = POST,GET
+            headers = *
+
+            [Azure Storage]
+            account_url = https://dpcontentstorage{{ .Values.global.environment }}.dfs.core.windows.net/
+            filesystem_name = datasets
+
+            [Azure Authentication]
+            tenant_id = f7619355-6c67-4100-9a78-1847f30742e2
+
+            [Jaeger Agent]
+            reporting_host = localhost
+            reporting_port = localhost
+
+{{ .Values.osirisegress.helm.values.endpoints | indent 12 }}
+
+    path: {{ default .Values.global.path .Values.osirisegress.path }}
+    repoURL: {{ .Values.osirisegress.repoURL }}
+    targetRevision: {{ default .Values.global.targetRevision .Values.osirisegress.targetRevision }}
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+    syncOptions:
+    - CreateNamespace=true

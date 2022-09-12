@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\version.props" />
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+	  <AssemblyName>Shared.Adapter.Ingress.Common</AssemblyName>
+    <RootNamespace>Shared.Adapter.Ingress.Common</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    
+    <!-- NuGet properties -->
+    <Description>This package contains common functionality for Ingress adapters to upload data to the DataPlatform. The library also contains cron scheduling for jobs</Description>
+    <PackageId>Shared.Adapter.Ingress.Common</PackageId>
+    <PackageIcon>nuget-logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cronos" Version="0.7.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="onprem.authlib">
+      <HintPath>onprem.authlib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\nuget-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

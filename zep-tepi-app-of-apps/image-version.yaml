@@ -1,0 +1,45 @@
+transform-ingress2event-time:
+  test: latest
+  prod: b97b233
+
+transform-neptun:
+  test: latest
+  prod: a60cb92
+
+transform-dmi-weather:
+  test: "af429c5"
+  prod: "539db71"
+
+transform-ikontrol:
+  test: latest
+  prod: "4bf94fb"
+
+transform-oilcable-leakdetection:
+  test: "21e2cec"
+  prod: "21e2cec"
+
+transform-jao2eds:
+  test: latest
+  prod: 43a6f27
+  
+transform-jao:
+  test: latest
+  prod: "7c761b0"
+
+ingress-adapter-jao:
+  test: latest
+  prod: 13c3d85
+
+ingress-adapter-ikontrol:
+  test: latest
+  prod: 511ac34
+  
+transform-neptun-masterdata:
+  test: fb3b856
+  prod: fb3b856
+
+
+ingress-adapter-nationalbanken:
+  test: 31b004d
+  prod: 31b004d
+

@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adapter.Gas.Neptun", "src\Adapter.Gas.Neptun.csproj", "{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7F2BCE43-119D-4EE1-86AE-0184E9266620}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{405792B3-0840-40B6-AB84-ACB42C152F8D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neptun.Adapter.UnitTest", "tests\Neptun.Adapter.UnitTest\Neptun.Adapter.UnitTest.csproj", "{A68927AD-99F3-47D0-8130-B55C5CD6CE2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neptun.Adapter.IntegrationsTest", "tests\Neptun.Adapter.IntegrationsTest\Neptun.Adapter.IntegrationsTest.csproj", "{45226CD6-E9AF-4069-8BD0-5E564BE16C14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A68927AD-99F3-47D0-8130-B55C5CD6CE2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A68927AD-99F3-47D0-8130-B55C5CD6CE2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A68927AD-99F3-47D0-8130-B55C5CD6CE2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A68927AD-99F3-47D0-8130-B55C5CD6CE2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45226CD6-E9AF-4069-8BD0-5E564BE16C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45226CD6-E9AF-4069-8BD0-5E564BE16C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45226CD6-E9AF-4069-8BD0-5E564BE16C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45226CD6-E9AF-4069-8BD0-5E564BE16C14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FF0EE82D-9AE0-41B1-A2B8-63BCC587B789} = {405792B3-0840-40B6-AB84-ACB42C152F8D}
+		{A68927AD-99F3-47D0-8130-B55C5CD6CE2E} = {7F2BCE43-119D-4EE1-86AE-0184E9266620}
+		{45226CD6-E9AF-4069-8BD0-5E564BE16C14} = {7F2BCE43-119D-4EE1-86AE-0184E9266620}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7B83E98-60FB-4780-B973-A5020151B0D6}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,62 @@
+{{ if .Values.azureMetricsExporter.enabled}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azure-metrics-exporter-{{ .Values.global.environment }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: azure-metrics-exporter
+    component: exporter
+    env: {{ .Values.global.environment }}
+spec:
+  destination:
+    namespace: {{ .Values.azureMetricsExporter.namespace }}
+    name: env-aks-dp-{{ .Values.global.environment }}
+  project: {{ .Values.global.environment }}
+  source:
+    helm:
+      values: |-
+        image:
+          repository: service-dp.westeurope.cloudapp.azure.com/tooling-azure-metrics-exporter/tooling-azure-metrics-exporter
+          tag: {{ .Values.azureMetricsExporter.helm.values.image.tag }}
+          pullPolicy: IfNotPresent
+          pullSecret: 
+
+        config:
+          secretName: azure-metrics-exporter-config
+          secretMountPath: /azure-config
+
+          {{- with .Values.azureMetricsExporter.helm }}
+          configFile:
+            azure.yml: |
+              active_directory_authority_url: "https://login.microsoftonline.com/"
+              resource_manager_url: "https://management.azure.com/"
+              credentials:
+                subscription_id: {{ .values.config.subscriptionId }}
+                tenant_id: {{ .values.config.tenantId }}
+                client_id: {{ .values.config.clientId }}
+                client_secret: {{ .values.config.clientSecret }}
+              targets:
+              {{- range .values.config.targets }}
+              - resource: {{ .resource | quote }}
+                metrics:
+                {{- range .metrics }}
+                - name: {{ . | quote }}
+                {{- end }}
+              {{- end }}
+          {{ end }}
+
+    path: {{ default .Values.global.path .Values.azureMetricsExporter.path }}
+    repoURL: {{ .Values.azureMetricsExporter.repoURL }}
+    targetRevision: {{ default .Values.global.targetRevision .Values.azureMetricsExporter.targetRevision }}
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+    syncOptions:
+    - CreateNamespace=true
+{{ end }}
+  

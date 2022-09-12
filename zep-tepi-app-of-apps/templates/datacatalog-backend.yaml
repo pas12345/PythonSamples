@@ -1,0 +1,80 @@
+{{ if .Values.datacatalogbackend.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: datacatalog-backend-{{ .Values.global.environment }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: datacatalog-backend
+    component: backend
+    env: {{ .Values.global.environment }}
+spec:
+  destination:
+    namespace: {{ .Values.datacatalogbackend.namespace }}
+    name: env-aks-dp-{{ .Values.global.environment }}
+  project: {{ .Values.global.environment }}
+  source:
+    helm:
+      values: |-
+        appName: datacatalog-backend-{{ .Values.global.environment }}
+        secretName: datacatalog-api-{{ $.Values.global.environment }}
+        environment: {{ $.Values.global.environment }}
+
+        apiDeployment:
+          replicaCount: 1
+          nodeSelector:
+            agentpool: worker
+          image:
+            repository: service-dp.westeurope.cloudapp.azure.com/datacatalog-backend/datacatalog-backend
+            tag: {{ .Values.datacatalogbackend.helm.values.image.tag | quote }}
+          env:
+            "ASPNETCORE_ENVIRONMENT": "{{ $.Values.global.environment }}"
+            "ContactInfo__Name": "{{ $.Values.datacatalogbackend.helm.values.env.contactInfoName }}"
+            "ContactInfo__Link": "{{ $.Values.datacatalogbackend.helm.values.env.contactInfoLink }}"
+            "ContactInfo__Email": "{{ $.Values.datacatalogbackend.helm.values.env.contactInfoEmail }}"
+
+        drmDeployment:
+          replicaCount: 1
+          nodeSelector:
+            agentpool: worker
+          image:
+            repository: service-dp.westeurope.cloudapp.azure.com/datacatalog-backend/datacatalog-backend-drm
+            tag: {{ .Values.datacatalogbackend.helm.values.image.tag | quote }}
+          env:
+            "ASPNETCORE_ENVIRONMENT": "{{ $.Values.global.environment }}"
+
+        ingress:
+          enabled: true
+          host: dp-{{ .Values.global.environment }}.westeurope.cloudapp.azure.com
+          path: /datacatalog-backend(/|$)(.*)
+          annotations:
+            nginx.ingress.kubernetes.io/rewrite-target: /$2
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            kubernetes.io/ingress.class: nginx
+          {{- range $key, $value := .Values.global.ingress.annotations }}
+            {{ $key }}: {{ $value | quote }}
+          {{- end }}
+        
+        job:
+          enabled: true
+          image:
+            repository: service-dp.westeurope.cloudapp.azure.com/datacatalog-backend/datacatalog-backend-migration
+            pullPolicy: IfNotPresent
+            # Overrides the image tag whose default is the chart appVersion.
+            tag: {{ .Values.datacatalogbackend.helm.values.image.tag | quote }}
+
+          env: 
+            "ASPNETCORE_ENVIRONMENT": "{{ .Values.global.environment }}"
+        
+    path: {{ default .Values.global.path .Values.datacatalogbackend.path }}
+    repoURL: {{ .Values.datacatalogbackend.repoURL }}
+    targetRevision: {{ default .Values.global.targetRevision .Values.datacatalogbackend.targetRevision }}
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+    syncOptions:
+    - CreateNamespace=true
+{{ end }}

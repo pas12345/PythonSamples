@@ -1,0 +1,33 @@
+{{ if .Values.utilityWorkflows.enabled}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: utility-workflows-{{ .Values.global.environment }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: utility-workflows
+    component: utility
+    env: {{ .Values.global.environment }}
+spec:
+  destination:
+    namespace: {{ .Values.utilityWorkflows.namespace }}
+    name: env-aks-dp-{{ .Values.global.environment }}
+  project: {{ .Values.global.environment }}
+  source:
+    path: {{ default .Values.global.path .Values.utilityWorkflows.path }}
+    repoURL: {{ .Values.utilityWorkflows.repoURL }}
+    targetRevision: {{ default .Values.global.targetRevision .Values.utilityWorkflows.targetRevision }}
+    directory:
+      recurse: true
+      jsonnet: {}
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+    syncOptions:
+    - CreateNamespace=true
+{{ end }}
+  
